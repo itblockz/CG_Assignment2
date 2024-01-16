@@ -28,7 +28,6 @@ public class Assignment2_65050434_65050534 extends JPanel {
         f.setSize(width, height);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setVisible(true);
-        
     }
 
     @Override
@@ -38,70 +37,52 @@ public class Assignment2_65050434_65050534 extends JPanel {
         g.fillRect(0, 0, width, height);
         g.setColor(Color.BLACK);
 
-        String d = "M54.057 29.1724C41.09 2.25889 17.1476 -0.648923 6.79732 1.26136C4.63074 1.24256 0.453318 6.30651 1.07631 26.7127C1.85506 52.2204 28.5579 28.9512 38.7365 66.0409C46.8794 95.7126 36.1775 149.688 29.8086 172.967C30.5595 182.474 36.2106 195.824 52.8077 173.167C73.5542 144.846 70.2657 62.8143 54.057 29.1724Z";
-        String[] tokens = d.substring(1).split("C|Z");
-        int[] x = new int[4];
-        int[] y = new int[4];
-        String[] arr = tokens[0].split(" ");
-        x[0] = (int)Math.round(Double.parseDouble(arr[0]));
-        y[0] = (int)Math.round(Double.parseDouble(arr[1]));
-        for (int i = 1; i < tokens.length; i++) {
-            arr = tokens[i].split(" ");
-            x[1] = (int)Math.round(Double.parseDouble(arr[0]));
-            y[1] = (int)Math.round(Double.parseDouble(arr[1]));
-            x[2] = (int)Math.round(Double.parseDouble(arr[2]));
-            y[2] = (int)Math.round(Double.parseDouble(arr[3]));
-            x[3] = (int)Math.round(Double.parseDouble(arr[4]));
-            y[3] = (int)Math.round(Double.parseDouble(arr[5]));
-            GraphicsEngine.curve((Graphics2D)g, x, y);
-            x[0] = x[3];
-            y[0] = y[3];
+        Graphics2D g2 = (Graphics2D) g;
+        g2.translate(0, 0); 
+        String d = "M0.5 17.5C4.33333 11.6667 15.5 1.49012e-08 17.5 1.49998C20.1833 3.51243 23.3333 15.1666 25.5 22M13 6C14 5 16.3 5.5 15.5 7.5C14.7 9.5 10.1667 14 8 16C7.16667 16.6667 5.6 17.4 6 15C6.4 12.6 10.8333 8 13 6ZM17 13.5C19.0377 13.5 20.1 14.7 18.5 15.5C16.9 16.3 15 16.8 14 17C12.7897 17.2421 11.4 16.2 13 15C14.6 13.8 16 13.5 17 13.5Z";
+        String[] tokens = d.split("(?<=[A-Z]*)(?=[A-Z])");
+        int x1, y1, x2, y2;
+        x1 = y1 = 0;
+        for (String token : tokens) {
+            int[] arr, xPoints, yPoints;
+            char command = token.charAt(0);
+            switch (command) {
+                case 'M':
+                    arr = Arrays.stream(token.substring(1).split(" "))
+                        .mapToInt(str -> (int) Math.round(Double.parseDouble(str)))
+                        .toArray();
+                    x1 = arr[0];
+                    y1 = arr[1];
+                    break;
+                case 'V':
+                    y2 = (int) Math.round(Double.parseDouble(token.substring(1)));
+                    GraphicsEngine.line(g2, x1, y1, x1, y2);
+                    y1 = y2;
+                    break;
+                case 'H':
+                    x2 = (int) Math.round(Double.parseDouble(token.substring(1)));
+                    GraphicsEngine.line(g2, x1, y1, x2, y1);
+                    x1 = x2;
+                    break;
+                case 'C':
+                    arr = Arrays.stream(token.substring(1).split(" "))
+                        .mapToInt(str -> (int) Math.round(Double.parseDouble(str)))
+                        .toArray();
+                    xPoints = new int[4];
+                    yPoints = new int[4];
+                    xPoints[0] = x1;
+                    yPoints[0] = y1;
+                    for (int i = 0; i < 6; i+=2) {
+                        xPoints[i/2 + 1] = arr[i];
+                        yPoints[i/2 + 1] = arr[i+1];
+                    }
+                    GraphicsEngine.curve(g2, xPoints, yPoints);
+                    x1 = xPoints[3];
+                    y1 = yPoints[3];
+                    break;
+                default:
+                    break;
+            }
         }
     } // paint
-
-    static void draw(Graphics2D g2, Map<String, String> data) {
-        String type = data.get("TYPE");
-        int n;
-        int[] x, y;
-        String color;
-        switch (type) {
-            case "line":
-                int x1 = Integer.parseInt(data.get("X1"));
-                int y1 = Integer.parseInt(data.get("Y1"));
-                int x2 = Integer.parseInt(data.get("X2"));
-                int y2 = Integer.parseInt(data.get("Y2"));
-                color = data.get("COLOR_BOUND");
-                if (!data.get("COLOR").isEmpty())
-                    color = data.get("COLOR");
-                g2.setColor(Color.decode(color));
-                GraphicsEngine.line(g2, x1, y1, x2, y2);
-                break;
-            case "curve":
-                n = 4;
-                x = new int[n];
-                y = new int[n];
-                for (int i = 0; i < n; i++) {
-                    x[i] = Integer.parseInt(data.get("X"+(i+1)));
-                    y[i] = Integer.parseInt(data.get("Y"+(i+1)));
-                }
-                color = data.get("COLOR_BOUND");
-                if (!data.get("COLOR").isEmpty())
-                    color = data.get("COLOR");
-                g2.setColor(Color.decode(color));
-                GraphicsEngine.curve(g2, x, y);
-                break;
-            case "polygon":
-                n = 3;
-                x = new int[n];
-                y = new int[n];
-                for (int i = 0; i < n; i++) {
-                    x[i] = Integer.parseInt(data.get("X"+(i+1)));
-                    y[i] = Integer.parseInt(data.get("Y"+(i+1)));
-                }
-                color = data.get("COLOR");
-                g2.setColor(Color.decode(color));
-                GraphicsEngine.polygon(g2, x, y);
-                break;
-        } // switch
-    } // draw
 } // class
