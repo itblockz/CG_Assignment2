@@ -3,12 +3,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -35,11 +31,38 @@ public class Assignment2_65050434_65050534 extends JPanel {
         super.paintComponent(g);
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, height);
-        g.setColor(Color.BLACK);
+        Graphics2D g2d = (Graphics2D) g;
 
-        Graphics2D g2 = (Graphics2D) g;
-        g2.translate(0, 0); 
-        String d = "M0.5 17.5C4.33333 11.6667 15.5 1.49012e-08 17.5 1.49998C20.1833 3.51243 23.3333 15.1666 25.5 22M13 6C14 5 16.3 5.5 15.5 7.5C14.7 9.5 10.1667 14 8 16C7.16667 16.6667 5.6 17.4 6 15C6.4 12.6 10.8333 8 13 6ZM17 13.5C19.0377 13.5 20.1 14.7 18.5 15.5C16.9 16.3 15 16.8 14 17C12.7897 17.2421 11.4 16.2 13 15C14.6 13.8 16 13.5 17 13.5Z";
+        Database db = new Database();
+        boolean isTableCreated = db.createTable("./data.csv", "Data");
+        if (isTableCreated) {
+            List<Map<String, String>> table = db.getTable("Data");
+            for (Map<String,String> row : table) {
+                BufferedImage buffer = new BufferedImage(width+1, height+1, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2 = buffer.createGraphics();
+                int x = (int) Math.round(Double.parseDouble(row.get("X")));
+                int y = (int) Math.round(Double.parseDouble(row.get("Y")));
+                int w = (int) Math.round(Double.parseDouble(row.get("WIDTH")));
+                int h = (int) Math.round(Double.parseDouble(row.get("HEIGHT")));
+                double angle = Double.parseDouble(row.get("ROTATION"));
+                Color stroke = Color.decode(row.get("STROKE"));
+                Color fill = Color.decode(row.get("FILL"));
+                int seedX = (int) Math.round(Double.parseDouble(row.get("SEED_X")));
+                int seedY = (int) Math.round(Double.parseDouble(row.get("SEED_Y")));
+                String d = row.get("D");
+                g2.setColor(stroke);
+                draw(g2, d);
+                GraphicsEngine.fill(buffer, seedX, seedY, fill);
+                g2d.translate(x, y);
+                g2d.rotate(-Math.toRadians(angle), w/2, h/2);
+                g2d.drawImage(buffer, 0, 0, null);
+                g2d.rotate(Math.toRadians(angle), w/2, h/2);
+                g2d.translate(-x, -y);
+            } // for
+        } // if
+    } // paint
+
+    public void draw(Graphics2D g2, String d) {
         String[] tokens = d.split("(?<=[A-Z]*)(?=[A-Z])");
         int x1, y1, x2, y2;
         x1 = y1 = 0;
@@ -47,24 +70,34 @@ public class Assignment2_65050434_65050534 extends JPanel {
             int[] arr, xPoints, yPoints;
             char command = token.charAt(0);
             switch (command) {
-                case 'M':
+                case 'M': // Move To
                     arr = Arrays.stream(token.substring(1).split(" "))
                         .mapToInt(str -> (int) Math.round(Double.parseDouble(str)))
                         .toArray();
                     x1 = arr[0];
                     y1 = arr[1];
                     break;
-                case 'V':
+                case 'V': // Vertical Line To
                     y2 = (int) Math.round(Double.parseDouble(token.substring(1)));
                     GraphicsEngine.line(g2, x1, y1, x1, y2);
                     y1 = y2;
                     break;
-                case 'H':
+                case 'H': // Horizontal Line To
                     x2 = (int) Math.round(Double.parseDouble(token.substring(1)));
                     GraphicsEngine.line(g2, x1, y1, x2, y1);
                     x1 = x2;
                     break;
-                case 'C':
+                case 'L': // Line To
+                    arr = Arrays.stream(token.substring(1).split(" "))
+                        .mapToInt(str -> (int) Math.round(Double.parseDouble(str)))
+                        .toArray();
+                    x2 = arr[0];
+                    y2 = arr[1];
+                    GraphicsEngine.line(g2, x1, y1, x2, y2);
+                    x1 = x2;
+                    y1 = y2;
+                    break;
+                case 'C': // Cubic Bezier Curve
                     arr = Arrays.stream(token.substring(1).split(" "))
                         .mapToInt(str -> (int) Math.round(Double.parseDouble(str)))
                         .toArray();
@@ -82,7 +115,7 @@ public class Assignment2_65050434_65050534 extends JPanel {
                     break;
                 default:
                     break;
-            }
-        }
-    } // paint
+            } // switch
+        } // for
+    } // draw
 } // class
