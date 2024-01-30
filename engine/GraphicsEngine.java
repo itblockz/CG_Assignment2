@@ -66,6 +66,83 @@ public class GraphicsEngine {
         g2.fillPolygon(x, y, x.length);
     }
 
+    public void midpointCircle(Graphics2D g2,int xc, int yc, int r) {
+        int x = 0;
+        int y = r;
+        int Dx = 2 * x;
+        int Dy = 2 * y;
+        int D = 1 - r;
+        while (x <= y) {
+            plot(g2, x + xc, y + yc);
+            plot(g2, x + xc, -y + yc);
+            plot(g2, -x + xc, y + yc);
+            plot(g2, -x + xc, -y + yc);
+            plot(g2, y + xc, x + yc);
+            plot(g2, y + xc, -x + yc);
+            plot(g2, -y + xc, x + yc);
+            plot(g2, -y + xc, -x + yc);
+
+            x = x + 1;
+            Dx = Dx + 2;
+            D = D + Dx + 1;
+            if (D >= 0) {
+                y = y - 1;
+                Dy = Dy - 2;
+                D = D - Dy;
+            }
+        }
+    }
+
+    public void midpointEllipse(Graphics2D g2, int xc, int yc, int a, int b) {
+        int a2 = a*a, b2 = b*b;
+        int twoA2 = 2*a2, twoB2 = 2*b2;
+        int x, y, D, Dx, Dy;
+
+        // REGION 1
+        x = 0;
+        y = b;
+        D = Math.round(b2 - a2*b + a2/4);
+        Dx = 0; Dy = twoA2*y;
+        while (Dx <= Dy) {
+            plot(g2, x + xc, y + yc);
+            plot(g2, x + xc, -y + yc);
+            plot(g2, -x + xc, y + yc);
+            plot(g2, -x + xc, -y + yc);
+
+            x = x + 1;
+            Dx = Dx + twoB2;
+            D = D + Dx + b2;
+
+            if (D >= 0) {
+                y = y - 1;
+                Dy = Dy - twoA2;
+                D = D - Dy;
+            }
+        }
+
+        // REGION 2
+        x = a;
+        y = 0;
+        D = Math.round(a2 - b2*a + b2/4);
+        Dx = twoB2*x; Dy = 0;
+        while (Dx >= Dy) {
+            plot(g2, x + xc, y + yc);
+            plot(g2, x + xc, -y + yc);
+            plot(g2, -x + xc, y + yc);
+            plot(g2, -x + xc, -y + yc);
+
+            y = y + 1;
+            Dy = Dy + twoA2;
+            D = D + Dy + a2;
+
+            if (D >= 0) {
+                x = x - 1;
+                Dx = Dx - twoB2;
+                D = D - Dx;
+            }
+        }
+    }
+
     public static void fill(BufferedImage m, int x, int y, Color replacementColour) {
         int targetColour = m.getRGB(x, y);
         if (targetColour == replacementColour.getRGB()) return;

@@ -12,10 +12,16 @@ import javax.swing.JPanel;
 import engine.Database;
 import engine.GraphicsEngine;
 
-public class Assignment2_65050434_65050534 extends JPanel {
+public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static final int width = 600;
     private static final int height = 600;
-    
+    private static double catFrontLegRotate = 0;
+    private static double catBackLegRotate = 0;
+    private static double catPacifierMove = 0;
+    private static double catFrontLegVelocity = 20;
+    private static double catBackLegVelocity = 20;
+    private static double catPacifierVelocity = 0;
+    private static double catPacifierAccelaration = 200;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -24,6 +30,51 @@ public class Assignment2_65050434_65050534 extends JPanel {
         f.setSize(width, height);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setVisible(true);
+
+        (new Thread(m)).start();
+    }
+
+    @Override
+    public void run() {
+        double lastTime = System.currentTimeMillis();
+        double currentTime, elapsedTime, elapsedTimeSinceStart;
+        double startTime = lastTime;
+
+        while (true) {
+            currentTime = System.currentTimeMillis();
+            elapsedTime = currentTime - lastTime;
+            lastTime = currentTime;
+            elapsedTimeSinceStart = (currentTime - startTime) / 1000.0; // second
+
+            // Rotate v degree per second
+            catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
+            catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
+            if (catPacifierMove <= 600)
+                catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
+            double limit = 10;
+            // Check for swing limits and reverse direction if necessary
+            if (catFrontLegRotate >= limit) {
+                catFrontLegRotate = limit;
+                catFrontLegVelocity = -catFrontLegVelocity;
+            } else if (catFrontLegRotate <= -limit) {
+                catFrontLegRotate = -limit;
+                catFrontLegVelocity = -catFrontLegVelocity;
+            }
+            if (catBackLegRotate >= limit) {
+                catBackLegRotate = limit;
+                catBackLegVelocity = -catBackLegVelocity;
+            } else if (catBackLegRotate <= -limit) {
+                catBackLegRotate = -limit;
+                catBackLegVelocity = -catBackLegVelocity;
+            }
+
+            if (elapsedTimeSinceStart > 1.0) {
+                catPacifierVelocity += catPacifierAccelaration * elapsedTime / 1000.0;
+            }
+
+            // Display
+            repaint();
+        }
     }
 
     @Override
@@ -40,22 +91,44 @@ public class Assignment2_65050434_65050534 extends JPanel {
             for (Map<String,String> row : table) {
                 BufferedImage buffer = new BufferedImage(width+1, height+1, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D g2 = buffer.createGraphics();
+                String name = row.get("NAME");
                 int x = (int) Math.round(Double.parseDouble(row.get("X")));
                 int y = (int) Math.round(Double.parseDouble(row.get("Y")));
                 int w = (int) Math.round(Double.parseDouble(row.get("WIDTH")));
                 int h = (int) Math.round(Double.parseDouble(row.get("HEIGHT")));
                 double angle = Double.parseDouble(row.get("ROTATION"));
                 Color stroke = Color.decode(row.get("STROKE"));
-                Color fill = Color.decode(row.get("FILL"));
-                int seedX = (int) Math.round(Double.parseDouble(row.get("SEED_X")));
-                int seedY = (int) Math.round(Double.parseDouble(row.get("SEED_Y")));
                 String d = row.get("D");
                 g2.setColor(stroke);
                 draw(g2, d);
-                GraphicsEngine.fill(buffer, seedX, seedY, fill);
+                if (!row.get("FILL").isEmpty()) {
+                    Color fill = Color.decode(row.get("FILL"));
+                    int seedX = (int) Math.round(Double.parseDouble(row.get("SEED_X")));
+                    int seedY = (int) Math.round(Double.parseDouble(row.get("SEED_Y")));
+                    GraphicsEngine.fill(buffer, seedX, seedY, fill);
+                }
                 g2d.translate(x, y);
                 g2d.rotate(-Math.toRadians(angle), w/2, h/2);
-                g2d.drawImage(buffer, 0, 0, null);
+                double originX, originY;
+                if (name.startsWith("cat_leg_front")) {
+                    originX = 20.5;
+                    originY = 11;
+                    g2d.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.rotate(Math.toRadians(catFrontLegRotate), originX, originY);
+                } else if (name.startsWith("cat_leg_back")) {
+                    originX = 27.58;
+                    originY = 13;
+                    g2d.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.rotate(Math.toRadians(catFrontLegRotate), originX, originY);
+                } else if (name.startsWith("cat_pacifier")) {
+                    g2d.translate(0, catPacifierMove);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.translate(0, -catPacifierMove);
+                } else {
+                    g2d.drawImage(buffer, 0, 0, null);
+                }
                 g2d.rotate(Math.toRadians(angle), w/2, h/2);
                 g2d.translate(-x, -y);
             } // for
