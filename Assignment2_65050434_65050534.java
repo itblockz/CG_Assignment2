@@ -18,8 +18,8 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double catFrontLegRotate = 0;
     private static double catBackLegRotate = 0;
     private static double catPacifierMove = 0;
-    private static double catMustacheScale = 0.00001;
-    private static double catBeardScale = 0.00001;
+    private static double catMustacheScale = 0.000001;
+    private static double catBeardScale = 0.000001;
     private static double catFrontLegVelocity = 20;
     private static double catBackLegVelocity = 20;
     private static double catPacifierVelocity = 0;
@@ -158,7 +158,7 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
 
     public void draw(Graphics2D g2, String d) {
         String[] tokens = d.split("(?<=[A-Z]*)(?=[A-Z])");
-        int x1, y1, x2, y2;
+        int x1, y1, x2, y2, r, a, b;
         x1 = y1 = 0;
         for (String token : tokens) {
             int[] arr, xPoints, yPoints;
@@ -206,6 +206,18 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     GraphicsEngine.curve(g2, xPoints, yPoints);
                     x1 = xPoints[3];
                     y1 = yPoints[3];
+                    break;
+                case 'O': // Circle "not in SVG"
+                    r = (int) Math.round(Double.parseDouble(token.substring(1)));
+                    GraphicsEngine.circle(g2, x1, y1, r);
+                    break;
+                case 'E': // Ellipse "not in SVG"
+                    arr = Arrays.stream(token.substring(1).split(" "))
+                    .mapToInt(str -> (int) Math.round(Double.parseDouble(str)))
+                    .toArray();
+                    a = arr[0];
+                    b = arr[1];
+                    GraphicsEngine.ellipse(g2, x1, y1, a, b);
                     break;
                 default:
                     break;

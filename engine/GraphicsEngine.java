@@ -66,7 +66,7 @@ public class GraphicsEngine {
         g2.fillPolygon(x, y, x.length);
     }
 
-    public void midpointCircle(Graphics2D g2,int xc, int yc, int r) {
+    public static void circle(Graphics2D g2,int xc, int yc, int r) {
         int x = 0;
         int y = r;
         int Dx = 2 * x;
@@ -93,7 +93,7 @@ public class GraphicsEngine {
         }
     }
 
-    public void midpointEllipse(Graphics2D g2, int xc, int yc, int a, int b) {
+    public static void ellipse(Graphics2D g2, int xc, int yc, int a, int b) {
         int a2 = a*a, b2 = b*b;
         int twoA2 = 2*a2, twoB2 = 2*b2;
         int x, y, D, Dx, Dy;
