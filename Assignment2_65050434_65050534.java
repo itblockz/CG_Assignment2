@@ -22,6 +22,8 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double catBackLegVelocity = 20;
     private static double catPacifierVelocity = 0;
     private static double catPacifierAccelaration = 200;
+    private static double catMustacheScale = 0.00001;
+    private static double catMustacheVelocity = 1;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -68,8 +70,14 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 catBackLegVelocity = -catBackLegVelocity;
             }
 
-            if (elapsedTimeSinceStart > 1.0) {
+            if (elapsedTimeSinceStart > 1.0 && elapsedTimeSinceStart <= 3.0) {
                 catPacifierVelocity += catPacifierAccelaration * elapsedTime / 1000.0;
+            }
+            if (elapsedTimeSinceStart > 3.0 && elapsedTimeSinceStart <= 5.0) {
+                catMustacheScale += catMustacheVelocity * elapsedTime / 1000.0;
+            }
+            if (catMustacheScale > 1) {
+                catMustacheScale = 1;
             }
 
             // Display
@@ -126,6 +134,10 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     g2d.translate(0, catPacifierMove);
                     g2d.drawImage(buffer, 0, 0, null);
                     g2d.translate(0, -catPacifierMove);
+                } else if (name.startsWith("cat_mustache")) {
+                    g2d.scale(1, catMustacheScale);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.scale(1, 1/catMustacheScale);
                 } else {
                     g2d.drawImage(buffer, 0, 0, null);
                 }
