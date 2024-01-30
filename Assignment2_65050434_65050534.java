@@ -18,12 +18,14 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double catFrontLegRotate = 0;
     private static double catBackLegRotate = 0;
     private static double catPacifierMove = 0;
+    private static double catMustacheScale = 0.00001;
+    private static double catBeardScale = 0.00001;
     private static double catFrontLegVelocity = 20;
     private static double catBackLegVelocity = 20;
     private static double catPacifierVelocity = 0;
-    private static double catPacifierAccelaration = 200;
-    private static double catMustacheScale = 0.00001;
     private static double catMustacheVelocity = 1;
+    private static double catBeardVelocity = 1;
+    private static double catPacifierAccelaration = 200;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -48,25 +50,24 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
             lastTime = currentTime;
             elapsedTimeSinceStart = (currentTime - startTime) / 1000.0; // second
 
-            // Rotate v degree per second
             catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
             catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
             if (catPacifierMove <= 600)
                 catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
-            double limit = 10;
+            double swingLimit = 10;
             // Check for swing limits and reverse direction if necessary
-            if (catFrontLegRotate >= limit) {
-                catFrontLegRotate = limit;
+            if (catFrontLegRotate >= swingLimit) {
+                catFrontLegRotate = swingLimit;
                 catFrontLegVelocity = -catFrontLegVelocity;
-            } else if (catFrontLegRotate <= -limit) {
-                catFrontLegRotate = -limit;
+            } else if (catFrontLegRotate <= -swingLimit) {
+                catFrontLegRotate = -swingLimit;
                 catFrontLegVelocity = -catFrontLegVelocity;
             }
-            if (catBackLegRotate >= limit) {
-                catBackLegRotate = limit;
+            if (catBackLegRotate >= swingLimit) {
+                catBackLegRotate = swingLimit;
                 catBackLegVelocity = -catBackLegVelocity;
-            } else if (catBackLegRotate <= -limit) {
-                catBackLegRotate = -limit;
+            } else if (catBackLegRotate <= -swingLimit) {
+                catBackLegRotate = -swingLimit;
                 catBackLegVelocity = -catBackLegVelocity;
             }
 
@@ -75,9 +76,13 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
             }
             if (elapsedTimeSinceStart > 3.0 && elapsedTimeSinceStart <= 5.0) {
                 catMustacheScale += catMustacheVelocity * elapsedTime / 1000.0;
+                catBeardScale += catBeardVelocity * elapsedTime / 1000.0;
             }
             if (catMustacheScale > 1) {
                 catMustacheScale = 1;
+            }
+            if (catBeardScale > 1) {
+                catBeardScale = 1;
             }
 
             // Display
@@ -138,6 +143,10 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     g2d.scale(1, catMustacheScale);
                     g2d.drawImage(buffer, 0, 0, null);
                     g2d.scale(1, 1/catMustacheScale);
+                } else if (name.startsWith("cat_beard")) {
+                    g2d.scale(1, catBeardScale);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.scale(1, 1/catBeardScale);
                 } else {
                     g2d.drawImage(buffer, 0, 0, null);
                 }
