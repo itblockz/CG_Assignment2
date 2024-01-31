@@ -60,9 +60,11 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
             catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
             catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
             orangeRotate += orangeRotateVelocity * elapsedTime / 1000.0;
-            orangeMoveX += orangeVelocityX * elapsedTime / 1000.0;
-            orangeMoveY += orangeVelocityY * elapsedTime / 1000.0;
             orangeVelocityY += orangeAccelarationY * elapsedTime / 1000.0;
+            if (orangeMoveX > -700) {
+                orangeMoveX += orangeVelocityX * elapsedTime / 1000.0;
+                orangeMoveY += orangeVelocityY * elapsedTime / 1000.0;
+            }
             if (catPacifierMove <= 600)
                 catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
             
@@ -96,22 +98,13 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 }
             }
             
-            if (orangeMoveY < 0) {
-                orangeMoveY = 0;
-            } else if (orangeMoveY > 0) {
+            if (orangeMoveX < -278 && orangeVelocityY == 0) {
+                orangeVelocityY = -100;
                 orangeAccelarationY = 50;
             }
-            if (orangeMoveX < -278)
-                orangeVelocityY = -100;
 
             // Display
             repaint();
-            // try {
-            //     Thread.sleep(50);
-                
-            // } catch (Exception e) {
-            //     // TODO: handle exception
-            // }
         }
     }
 
@@ -173,13 +166,13 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     g2d.drawImage(buffer, 0, 0, null);
                     g2d.scale(1, 1/catBeardScale);
                 } else if (name.startsWith("orange")) {
-                    // originX = 32;
-                    // originY = 27;
-                    // g2d.translate(orangeMoveX, orangeMoveY);
-                    // g2d.rotate(-Math.toRadians(orangeRotate), originX, originY);
-                    // g2d.drawImage(buffer, 0, 0, null);
-                    // g2d.rotate(Math.toRadians(orangeRotate), originX, originY);
-                    // g2d.translate(-orangeMoveX, -orangeMoveY);
+                    originX = 32;
+                    originY = 27;
+                    g2d.translate(orangeMoveX, orangeMoveY);
+                    g2d.rotate(-Math.toRadians(orangeRotate), originX, originY);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.rotate(Math.toRadians(orangeRotate), originX, originY);
+                    g2d.translate(-orangeMoveX, -orangeMoveY);
                 } else {
                     g2d.drawImage(buffer, 0, 0, null);
                 }
