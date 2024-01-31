@@ -29,7 +29,7 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double catMustacheVelocity = 1;
     private static double orangeRotateVelocity = 500;
     private static double catBeardVelocity = 1;
-    private static double orangeVelocityX = -100;
+    private static double orangeVelocityX = -150;
     private static double orangeVelocityY = 0;
     private static double catPacifierAccelaration = 200;
     private static double orangeAccelarationY = 0;
