@@ -17,15 +17,22 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static final int height = 600;
     private static double catFrontLegRotate = 0;
     private static double catBackLegRotate = 0;
+    private static double orangeRotate = 0;
     private static double catPacifierMove = 0;
+    private static double orangeMoveX = 0;
+    private static double orangeMoveY = 0;
     private static double catMustacheScale = 0.000001;
     private static double catBeardScale = 0.000001;
     private static double catFrontLegVelocity = 20;
     private static double catBackLegVelocity = 20;
     private static double catPacifierVelocity = 0;
     private static double catMustacheVelocity = 1;
+    private static double orangeRotateVelocity = 500;
     private static double catBeardVelocity = 1;
+    private static double orangeVelocityX = -100;
+    private static double orangeVelocityY = 0;
     private static double catPacifierAccelaration = 200;
+    private static double orangeAccelarationY = 0;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -52,8 +59,13 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
 
             catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
             catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
+            orangeRotate += orangeRotateVelocity * elapsedTime / 1000.0;
+            orangeMoveX += orangeVelocityX * elapsedTime / 1000.0;
+            orangeMoveY += orangeVelocityY * elapsedTime / 1000.0;
+            orangeVelocityY += orangeAccelarationY * elapsedTime / 1000.0;
             if (catPacifierMove <= 600)
                 catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
+            
             double swingLimit = 10;
             // Check for swing limits and reverse direction if necessary
             if (catFrontLegRotate >= swingLimit) {
@@ -73,20 +85,33 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
 
             if (elapsedTimeSinceStart > 1.0 && elapsedTimeSinceStart <= 3.0) {
                 catPacifierVelocity += catPacifierAccelaration * elapsedTime / 1000.0;
-            }
-            if (elapsedTimeSinceStart > 3.0 && elapsedTimeSinceStart <= 5.0) {
+            } else if (elapsedTimeSinceStart > 3.0 && elapsedTimeSinceStart <= 5.0) {
                 catMustacheScale += catMustacheVelocity * elapsedTime / 1000.0;
                 catBeardScale += catBeardVelocity * elapsedTime / 1000.0;
+                if (catMustacheScale > 1) {
+                    catMustacheScale = 1;
+                }
+                if (catBeardScale > 1) {
+                    catBeardScale = 1;
+                }
             }
-            if (catMustacheScale > 1) {
-                catMustacheScale = 1;
+            
+            if (orangeMoveY < 0) {
+                orangeMoveY = 0;
+            } else if (orangeMoveY > 0) {
+                orangeAccelarationY = 50;
             }
-            if (catBeardScale > 1) {
-                catBeardScale = 1;
-            }
+            if (orangeMoveX < -278)
+                orangeVelocityY = -100;
 
             // Display
             repaint();
+            // try {
+            //     Thread.sleep(50);
+                
+            // } catch (Exception e) {
+            //     // TODO: handle exception
+            // }
         }
     }
 
@@ -147,6 +172,14 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     g2d.scale(1, catBeardScale);
                     g2d.drawImage(buffer, 0, 0, null);
                     g2d.scale(1, 1/catBeardScale);
+                } else if (name.startsWith("orange")) {
+                    // originX = 32;
+                    // originY = 27;
+                    // g2d.translate(orangeMoveX, orangeMoveY);
+                    // g2d.rotate(-Math.toRadians(orangeRotate), originX, originY);
+                    // g2d.drawImage(buffer, 0, 0, null);
+                    // g2d.rotate(Math.toRadians(orangeRotate), originX, originY);
+                    // g2d.translate(-orangeMoveX, -orangeMoveY);
                 } else {
                     g2d.drawImage(buffer, 0, 0, null);
                 }
@@ -224,4 +257,8 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
             } // switch
         } // for
     } // draw
+
+    private double cubic(double t, int x1, int x2, int x3, int x4) {
+        return (1-t)*(1-t)*(1-t)*x1 + 3*t*(1-t)*(1-t)*x2 + 3*t*t*(1-t)*x3 + t*t*t*x4;
+    }
 } // class
