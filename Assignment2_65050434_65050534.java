@@ -33,6 +33,8 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double orangeVelocityY = 0;
     private static double catPacifierAccelaration = 200;
     private static double orangeAccelarationY = 0;
+    private static double flower1Scale = 1;
+    private static double flower1Velocity = 0.1;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -94,6 +96,9 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 if (catBeardScale > 1) {
                     catBeardScale = 1;
                 }
+            }
+            if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <=4){
+                flower1Scale +=  flower1Velocity * elapsedTime / 1000.0;
             }
             
             if (orangeMoveY < 0) {
@@ -180,7 +185,27 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     // g2d.drawImage(buffer, 0, 0, null);
                     // g2d.rotate(Math.toRadians(orangeRotate), originX, originY);
                     // g2d.translate(-orangeMoveX, -orangeMoveY);
-                } else {
+                } else if (name.startsWith("flower_up")){
+                    g2d.translate(w/2, 0);
+                    g2d.scale(flower1Scale, flower1Scale);
+                    g2d.translate(-w/2, 0);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.translate(w/2, 0);
+                    g2d.scale(1/flower1Scale, 1/flower1Scale);
+                    g2d.translate(-w/2, 0);
+                    //g2d.scale(1/flower1Scale, 1/flower1Scale);
+                    //g2d.drawImage(buffer, 0, 0, null);
+                }
+                else if (name.startsWith("flower_down")){
+                    g2d.translate(w/2, h);
+                    g2d.scale(flower1Scale, flower1Scale);
+                    g2d.translate(-w/2, -h);
+                    g2d.drawImage(buffer, 0, 0, null);
+                    g2d.translate(w/2, h);
+                    g2d.scale(1/flower1Scale, 1/flower1Scale);
+                    g2d.translate(-w/2, -h);
+                }
+                else {
                     g2d.drawImage(buffer, 0, 0, null);
                 }
                 g2d.rotate(Math.toRadians(angle), w/2, h/2);
