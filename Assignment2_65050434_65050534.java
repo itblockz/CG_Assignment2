@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
@@ -19,20 +20,19 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double catBackLegRotate = 0;
     private static double orangeRotate = 0;
     private static double catPacifierMove = 0;
-    private static double orangeMoveX = 0;
-    private static double orangeMoveY = 0;
+    private static double orangeMove = 0;
     private static double catMustacheScale = 0.000001;
     private static double catBeardScale = 0.000001;
     private static double catFrontLegVelocity = 20;
     private static double catBackLegVelocity = 20;
     private static double catPacifierVelocity = 0;
     private static double catMustacheVelocity = 1;
-    private static double orangeRotateVelocity = 500;
     private static double catBeardVelocity = 1;
-    private static double orangeVelocityX = -150;
-    private static double orangeVelocityY = 0;
+    private static double orangeVelocity = -35;
     private static double catPacifierAccelaration = 200;
-    private static double orangeAccelarationY = 0;
+    private static double orangeAccelaration = 0;
+    private static double orangeFriction = 5;
+    private static double catPosition = -78;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -59,14 +59,13 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
 
             catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
             catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
-            orangeRotate += orangeRotateVelocity * elapsedTime / 1000.0;
-            orangeVelocityY += orangeAccelarationY * elapsedTime / 1000.0;
-            if (orangeMoveX > -700) {
-                orangeMoveX += orangeVelocityX * elapsedTime / 1000.0;
-                orangeMoveY += orangeVelocityY * elapsedTime / 1000.0;
-            }
-            if (catPacifierMove <= 600)
-                catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
+            // orangeMove += orangeVelocity * elapsedTime / 1000.0;
+            catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
+            
+            if (orangeVelocity > 0) orangeAccelaration = -orangeFriction;
+            else if (orangeVelocity < 0) orangeAccelaration = orangeFriction;
+            // orangeRotate += (-2 * orangeVelocity) * elapsedTime / 1000.0;
+            orangeVelocity += orangeAccelaration * elapsedTime / 1000.0;
             
             double swingLimit = 10;
             // Check for swing limits and reverse direction if necessary
@@ -98,9 +97,10 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 }
             }
             
-            if (orangeMoveX < -278 && orangeVelocityY == 0) {
-                orangeVelocityY = -100;
-                orangeAccelarationY = 50;
+            // Bounce back if enter cat
+            if (orangeMove < catPosition) {
+                orangeMove = catPosition;
+                orangeVelocity = -orangeVelocity;
             }
 
             // Display
@@ -138,46 +138,33 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     int seedY = (int) Math.round(Double.parseDouble(row.get("SEED_Y")));
                     GraphicsEngine.fill(buffer, seedX, seedY, fill);
                 }
+                g2d.setTransform(new AffineTransform());
                 g2d.translate(x, y);
                 g2d.rotate(-Math.toRadians(angle), w/2, h/2);
                 double originX, originY;
+                AffineTransform Tx = g2d.getTransform();
                 if (name.startsWith("cat_leg_front")) {
                     originX = 20.5;
                     originY = 11;
                     g2d.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
-                    g2d.drawImage(buffer, 0, 0, null);
-                    g2d.rotate(Math.toRadians(catFrontLegRotate), originX, originY);
                 } else if (name.startsWith("cat_leg_back")) {
                     originX = 27.58;
                     originY = 13;
                     g2d.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
-                    g2d.drawImage(buffer, 0, 0, null);
-                    g2d.rotate(Math.toRadians(catFrontLegRotate), originX, originY);
                 } else if (name.startsWith("cat_pacifier")) {
                     g2d.translate(0, catPacifierMove);
-                    g2d.drawImage(buffer, 0, 0, null);
-                    g2d.translate(0, -catPacifierMove);
                 } else if (name.startsWith("cat_mustache")) {
                     g2d.scale(1, catMustacheScale);
-                    g2d.drawImage(buffer, 0, 0, null);
-                    g2d.scale(1, 1/catMustacheScale);
                 } else if (name.startsWith("cat_beard")) {
                     g2d.scale(1, catBeardScale);
-                    g2d.drawImage(buffer, 0, 0, null);
-                    g2d.scale(1, 1/catBeardScale);
                 } else if (name.startsWith("orange")) {
                     originX = 32;
                     originY = 27;
-                    g2d.translate(orangeMoveX, orangeMoveY);
+                    g2d.translate(orangeMove, 0);
                     g2d.rotate(-Math.toRadians(orangeRotate), originX, originY);
-                    g2d.drawImage(buffer, 0, 0, null);
-                    g2d.rotate(Math.toRadians(orangeRotate), originX, originY);
-                    g2d.translate(-orangeMoveX, -orangeMoveY);
-                } else {
-                    g2d.drawImage(buffer, 0, 0, null);
                 }
-                g2d.rotate(Math.toRadians(angle), w/2, h/2);
-                g2d.translate(-x, -y);
+                g2d.drawImage(buffer, 0, 0, null);
+                g2d.setTransform(Tx);
             } // for
         } // if
     } // paint
