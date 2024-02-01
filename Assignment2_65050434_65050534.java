@@ -33,6 +33,10 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double orangeAccelaration = 0;
     private static double orangeFriction = 5;
     private static double catPosition = -78;
+    private static double flower1Scale = 1;
+    private static double flower1Velocity = 0.1;
+    private static double catLegSwingLimit = 10;
+    private static BufferedImage buffer;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -44,84 +48,104 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
 
         (new Thread(m)).start();
     }
-
+    
     @Override
     public void run() {
-        double lastTime = System.currentTimeMillis();
-        double currentTime, elapsedTime, elapsedTimeSinceStart;
-        double startTime = lastTime;
+        double elapsedTime, elapsedTimeSinceStart;
+        double currentTime, startTime;
 
+        int fps = 60;
+        int num = fps * 5;
+        elapsedTime = 1000.0 / fps;
+        elapsedTimeSinceStart = 0;
+        BufferedImage[] images = new BufferedImage[num];
+        for (int i = 0; i < num; i++) {
+            updateAnimation(elapsedTime, elapsedTimeSinceStart);
+            elapsedTimeSinceStart += elapsedTime;
+            images[i] = getDrawnBuffer();
+            buffer = images[i];
+            repaint();
+            System.out.printf("Buffer %d was drawn%n", i+1);
+        }
+
+        startTime = System.currentTimeMillis();
         while (true) {
             currentTime = System.currentTimeMillis();
-            elapsedTime = currentTime - lastTime;
-            lastTime = currentTime;
-            elapsedTimeSinceStart = (currentTime - startTime) / 1000.0; // second
-
-            catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
-            catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
-            // orangeMove += orangeVelocity * elapsedTime / 1000.0;
-            catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
-            
-            if (orangeVelocity > 0) orangeAccelaration = -orangeFriction;
-            else if (orangeVelocity < 0) orangeAccelaration = orangeFriction;
-            // orangeRotate += (-2 * orangeVelocity) * elapsedTime / 1000.0;
-            orangeVelocity += orangeAccelaration * elapsedTime / 1000.0;
-            
-            double swingLimit = 10;
-            // Check for swing limits and reverse direction if necessary
-            if (catFrontLegRotate >= swingLimit) {
-                catFrontLegRotate = swingLimit;
-                catFrontLegVelocity = -catFrontLegVelocity;
-            } else if (catFrontLegRotate <= -swingLimit) {
-                catFrontLegRotate = -swingLimit;
-                catFrontLegVelocity = -catFrontLegVelocity;
-            }
-            if (catBackLegRotate >= swingLimit) {
-                catBackLegRotate = swingLimit;
-                catBackLegVelocity = -catBackLegVelocity;
-            } else if (catBackLegRotate <= -swingLimit) {
-                catBackLegRotate = -swingLimit;
-                catBackLegVelocity = -catBackLegVelocity;
-            }
-
-            if (elapsedTimeSinceStart > 1.0 && elapsedTimeSinceStart <= 3.0) {
-                catPacifierVelocity += catPacifierAccelaration * elapsedTime / 1000.0;
-            } else if (elapsedTimeSinceStart > 3.0 && elapsedTimeSinceStart <= 5.0) {
-                catMustacheScale += catMustacheVelocity * elapsedTime / 1000.0;
-                catBeardScale += catBeardVelocity * elapsedTime / 1000.0;
-                if (catMustacheScale > 1) {
-                    catMustacheScale = 1;
-                }
-                if (catBeardScale > 1) {
-                    catBeardScale = 1;
-                }
-            }
-            
-            // Bounce back if enter cat
-            if (orangeMove < catPosition) {
-                orangeMove = catPosition;
-                orangeVelocity = -orangeVelocity;
-            }
-
-            // Display
+            elapsedTimeSinceStart = currentTime - startTime;
+            int idx = (int)(elapsedTimeSinceStart * num / 5000.0);
+            idx %= num;
+            buffer = images[idx];
             repaint();
+        }
+    }
+
+    public void updateAnimation(double elapsedTime, double elapsedTimeSinceStart) { // millisecond
+        elapsedTimeSinceStart /= 1000.0;
+        catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
+        catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
+        // orangeMove += orangeVelocity * elapsedTime / 1000.0;
+        catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
+        
+        if (orangeVelocity > 0) orangeAccelaration = -orangeFriction;
+        else if (orangeVelocity < 0) orangeAccelaration = orangeFriction;
+        // orangeRotate += (-2 * orangeVelocity) * elapsedTime / 1000.0;
+        orangeVelocity += orangeAccelaration * elapsedTime / 1000.0;
+        
+        // Check for swing limits and reverse direction if necessary
+        if (catFrontLegRotate >= catLegSwingLimit) {
+            catFrontLegRotate = catLegSwingLimit;
+            catFrontLegVelocity = -catFrontLegVelocity;
+        } else if (catFrontLegRotate <= -catLegSwingLimit) {
+            catFrontLegRotate = -catLegSwingLimit;
+            catFrontLegVelocity = -catFrontLegVelocity;
+        }
+        if (catBackLegRotate >= catLegSwingLimit) {
+            catBackLegRotate = catLegSwingLimit;
+            catBackLegVelocity = -catBackLegVelocity;
+        } else if (catBackLegRotate <= -catLegSwingLimit) {
+            catBackLegRotate = -catLegSwingLimit;
+            catBackLegVelocity = -catBackLegVelocity;
+        }
+
+        if (elapsedTimeSinceStart > 1.0 && elapsedTimeSinceStart <= 3.0) {
+            catPacifierVelocity += catPacifierAccelaration * elapsedTime / 1000.0;
+        } else if (elapsedTimeSinceStart > 3.0 && elapsedTimeSinceStart <= 5.0) {
+            catMustacheScale += catMustacheVelocity * elapsedTime / 1000.0;
+            catBeardScale += catBeardVelocity * elapsedTime / 1000.0;
+            if (catMustacheScale > 1) {
+                catMustacheScale = 1;
+            }
+            if (catBeardScale > 1) {
+                catBeardScale = 1;
+            }
+        }
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <=4){
+            flower1Scale +=  flower1Velocity * elapsedTime / 1000.0;
+        }
+        
+        // Bounce back if enter cat
+        if (orangeMove < catPosition) {
+            orangeMove = catPosition;
+            orangeVelocity = -orangeVelocity;
         }
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
-        Graphics2D g2d = (Graphics2D) g;
+        g.drawImage(buffer, 0, 0, null);
+    } // paint
 
+    private BufferedImage getDrawnBuffer() {
         Database db = new Database();
         boolean isTableCreated = db.createTable("./data.csv", "Data");
         if (isTableCreated) {
             List<Map<String, String>> table = db.getTable("Data");
+            BufferedImage sub1Buffer = new BufferedImage(width+1, height+1, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2Main = sub1Buffer.createGraphics();
             for (Map<String,String> row : table) {
-                BufferedImage buffer = new BufferedImage(width+1, height+1, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2 = buffer.createGraphics();
+                BufferedImage sub2Buffer = new BufferedImage(width+1, height+1, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2 = sub2Buffer.createGraphics();
                 String name = row.get("NAME");
                 int x = (int) Math.round(Double.parseDouble(row.get("X")));
                 int y = (int) Math.round(Double.parseDouble(row.get("Y")));
@@ -136,38 +160,49 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     Color fill = Color.decode(row.get("FILL"));
                     int seedX = (int) Math.round(Double.parseDouble(row.get("SEED_X")));
                     int seedY = (int) Math.round(Double.parseDouble(row.get("SEED_Y")));
-                    GraphicsEngine.fill(buffer, seedX, seedY, fill);
+                    GraphicsEngine.fill(sub2Buffer, seedX, seedY, fill);
                 }
-                g2d.setTransform(new AffineTransform());
-                g2d.translate(x, y);
-                g2d.rotate(-Math.toRadians(angle), w/2, h/2);
+                g2Main.setTransform(new AffineTransform());
+                g2Main.translate(x, y);
+                g2Main.rotate(-Math.toRadians(angle), w/2, h/2);
                 double originX, originY;
-                AffineTransform Tx = g2d.getTransform();
+                AffineTransform Tx = g2Main.getTransform();
                 if (name.startsWith("cat_leg_front")) {
                     originX = 20.5;
                     originY = 11;
-                    g2d.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
+                    g2Main.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
                 } else if (name.startsWith("cat_leg_back")) {
                     originX = 27.58;
                     originY = 13;
-                    g2d.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
+                    g2Main.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
                 } else if (name.startsWith("cat_pacifier")) {
-                    g2d.translate(0, catPacifierMove);
+                    g2Main.translate(0, catPacifierMove);
                 } else if (name.startsWith("cat_mustache")) {
-                    g2d.scale(1, catMustacheScale);
+                    g2Main.scale(1, catMustacheScale);
                 } else if (name.startsWith("cat_beard")) {
-                    g2d.scale(1, catBeardScale);
+                    g2Main.scale(1, catBeardScale);
                 } else if (name.startsWith("orange")) {
                     originX = 32;
                     originY = 27;
-                    g2d.translate(orangeMove, 0);
-                    g2d.rotate(-Math.toRadians(orangeRotate), originX, originY);
+                    g2Main.translate(orangeMove, 0);
+                    g2Main.rotate(-Math.toRadians(orangeRotate), originX, originY);
+                } else if (name.startsWith("flower_up")){
+                    g2Main.translate(w/2, 0);
+                    g2Main.scale(flower1Scale, flower1Scale);
+                    g2Main.translate(-w/2, 0);
                 }
-                g2d.drawImage(buffer, 0, 0, null);
-                g2d.setTransform(Tx);
+                else if (name.startsWith("flower_down")){
+                    g2Main.translate(w/2, h);
+                    g2Main.scale(flower1Scale, flower1Scale);
+                    g2Main.translate(-w/2, -h);
+                }
+                g2Main.drawImage(sub2Buffer, 0, 0, null);
+                g2Main.setTransform(Tx);
             } // for
+            return sub1Buffer;
         } // if
-    } // paint
+        return null;
+    }
 
     public void draw(Graphics2D g2, String d) {
         String[] tokens = d.split("(?<=[A-Z]*)(?=[A-Z])");
