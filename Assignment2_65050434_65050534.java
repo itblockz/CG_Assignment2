@@ -40,6 +40,12 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static int butterflyStateNum = 6;
     private static int butterflyState = 0;
     private static BufferedImage buffer;
+    private static double xButterfly1 = 0;
+    private static double yButterfly1 = 0;
+    private static double xButterfly2 = 0;
+    private static double yButterfly2 = 0;
+    private static double xButterfly3 = 0;
+    private static double yButterfly3 = 0;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
         JFrame f = new JFrame();
@@ -132,6 +138,26 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
             orangeMove = catPosition;
             orangeVelocity = -orangeVelocity;
         }
+
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 3){
+            xButterfly1 = cubic(elapsedTimeSinceStart/3, 0, 59, 202, 311);
+            yButterfly1 = cubic(elapsedTimeSinceStart/3, 0, 21, 94, 54);
+        }else if(elapsedTimeSinceStart > 3 && elapsedTimeSinceStart <= 5){
+            xButterfly1 = cubic((elapsedTimeSinceStart-3)/2, 311 , 435 , 423 , 428);
+            yButterfly1 = cubic((elapsedTimeSinceStart-3)/2, 54 , 8 , -56 , -68);
+        }
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 5){
+            xButterfly2 = cubic(elapsedTimeSinceStart/5, 0, -28, -164, -475);
+            yButterfly2 = cubic(elapsedTimeSinceStart/5, 0, -96, -281, -249);
+        }
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 3){
+            xButterfly3 = cubic(elapsedTimeSinceStart/3, 0, 24, 118, 306);
+            yButterfly3 = cubic(elapsedTimeSinceStart/3, 0, -29, -98, -138);
+        }else if (elapsedTimeSinceStart > 3 && elapsedTimeSinceStart <= 5){
+            xButterfly3 = cubic((elapsedTimeSinceStart-3)/2, 306, 493, 515, 503);
+            yButterfly3 = cubic((elapsedTimeSinceStart-3)/2, -138, -179, -269, -309);
+        }
+
     }
 
     @Override
@@ -201,6 +227,15 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 } else if (name.startsWith("butterfly")){
                     int nameState = Integer.parseInt(name.split("(?<=_)(?=\\d+)")[1]);
                     if (nameState != butterflyState) continue;
+                }
+                if (name.startsWith("butterfly1")){
+                    g2.translate(xButterfly1, yButterfly1);
+                }
+                else if (name.startsWith("butterfly2")){
+                    g2.translate(xButterfly2, yButterfly2);
+                    g2.scale(-1, 1);
+                }else if (name.startsWith("butterfly3")){
+                    g2.translate(xButterfly3, yButterfly3);
                 }
                 g2.drawImage(sub2Buffer, 0, 0, null);
                 g2.setTransform(Tx);
