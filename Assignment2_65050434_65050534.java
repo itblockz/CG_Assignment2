@@ -16,26 +16,29 @@ import engine.GraphicsEngine;
 public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static final int width = 600;
     private static final int height = 600;
-    private static double catFrontLegRotate = 0;
-    private static double catBackLegRotate = 0;
-    private static double orangeRotate = 0;
-    private static double catPacifierMove = 0;
-    private static double orangeMove = 0;
-    private static double catMustacheScale = 0.000001;
-    private static double catBeardScale = 0.000001;
-    private static double catFrontLegVelocity = 20;
-    private static double catBackLegVelocity = 20;
-    private static double catPacifierVelocity = 0;
-    private static double catMustacheVelocity = 1;
-    private static double catBeardVelocity = 1;
-    private static double orangeVelocity = -35;
-    private static double catPacifierAccelaration = 200;
-    private static double orangeAccelaration = 0;
+    private static double catFrontLegRotate = 0; // degrees
+    private static double catFrontLegVelocity = 20; // seconds
+    private static double catBackLegRotate = 0; // degrees
+    private static double catBackLegVelocity = 20; // seconds
+    private static double catLegSwingLimit = 10; // degrees
+    private static double catPacifierMove = 0; // pixels
+    private static double catPacifierVelocity = 0; // seconds
+    private static double catPacifierAccelaration = 200; // seconds
+    private static double catMustacheScale = 0; // times
+    private static double catMustacheVelocity = 1; // seconds
+    private static double catBeardScale = 0; // times
+    private static double catBeardVelocity = 1; // seconds
+    private static double orangeVelocity = -35; // seconds
+    private static double orangeAccelaration = 0; // seconds
+    private static double flower1Scale = 1; // times
+    private static double flower1Velocity = 0.1; // seconds
+    private static double orangeRotate = 0; // degrees
+    private static double orangeMove = 0; // pixels
     private static double orangeFriction = 5;
     private static double catPosition = -78;
-    private static double flower1Scale = 1;
-    private static double flower1Velocity = 0.1;
-    private static double catLegSwingLimit = 10;
+    private static double butterflyTimePeriod = 0.5; // seconds
+    private static int butterflyStateNum = 6;
+    private static int butterflyState = 0;
     private static BufferedImage buffer;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
@@ -85,6 +88,7 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
         catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
         // orangeMove += orangeVelocity * elapsedTime / 1000.0;
         catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
+        butterflyState = (int)(elapsedTimeSinceStart * butterflyStateNum / butterflyTimePeriod) % butterflyStateNum;
         
         if (orangeVelocity > 0) orangeAccelaration = -orangeFriction;
         else if (orangeVelocity < 0) orangeAccelaration = orangeFriction;
@@ -142,10 +146,10 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
         if (isTableCreated) {
             List<Map<String, String>> table = db.getTable("Data");
             BufferedImage sub1Buffer = new BufferedImage(width+1, height+1, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2Main = sub1Buffer.createGraphics();
+            Graphics2D g2 = sub1Buffer.createGraphics();
             for (Map<String,String> row : table) {
                 BufferedImage sub2Buffer = new BufferedImage(width+1, height+1, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2 = sub2Buffer.createGraphics();
+                Graphics2D g2Sub = sub2Buffer.createGraphics();
                 String name = row.get("NAME");
                 int x = (int) Math.round(Double.parseDouble(row.get("X")));
                 int y = (int) Math.round(Double.parseDouble(row.get("Y")));
@@ -154,50 +158,52 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 double angle = Double.parseDouble(row.get("ROTATION"));
                 Color stroke = Color.decode(row.get("STROKE"));
                 String d = row.get("D");
-                g2.setColor(stroke);
-                draw(g2, d);
+                g2Sub.setColor(stroke);
+                draw(g2Sub, d);
                 if (!row.get("FILL").isEmpty()) {
                     Color fill = Color.decode(row.get("FILL"));
                     int seedX = (int) Math.round(Double.parseDouble(row.get("SEED_X")));
                     int seedY = (int) Math.round(Double.parseDouble(row.get("SEED_Y")));
                     GraphicsEngine.fill(sub2Buffer, seedX, seedY, fill);
                 }
-                g2Main.setTransform(new AffineTransform());
-                g2Main.translate(x, y);
-                g2Main.rotate(-Math.toRadians(angle), w/2, h/2);
+                g2.setTransform(new AffineTransform());
+                g2.translate(x, y);
+                g2.rotate(-Math.toRadians(angle), w/2, h/2);
                 double originX, originY;
-                AffineTransform Tx = g2Main.getTransform();
+                AffineTransform Tx = g2.getTransform();
                 if (name.startsWith("cat_leg_front")) {
                     originX = 20.5;
                     originY = 11;
-                    g2Main.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
+                    g2.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
                 } else if (name.startsWith("cat_leg_back")) {
                     originX = 27.58;
                     originY = 13;
-                    g2Main.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
+                    g2.rotate(-Math.toRadians(catFrontLegRotate), originX, originY);
                 } else if (name.startsWith("cat_pacifier")) {
-                    g2Main.translate(0, catPacifierMove);
+                    g2.translate(0, catPacifierMove);
                 } else if (name.startsWith("cat_mustache")) {
-                    g2Main.scale(1, catMustacheScale);
+                    g2.scale(1, catMustacheScale);
                 } else if (name.startsWith("cat_beard")) {
-                    g2Main.scale(1, catBeardScale);
+                    g2.scale(1, catBeardScale);
                 } else if (name.startsWith("orange")) {
                     originX = 32;
                     originY = 27;
-                    g2Main.translate(orangeMove, 0);
-                    g2Main.rotate(-Math.toRadians(orangeRotate), originX, originY);
+                    g2.translate(orangeMove, 0);
+                    g2.rotate(-Math.toRadians(orangeRotate), originX, originY);
                 } else if (name.startsWith("flower_up")){
-                    g2Main.translate(w/2, 0);
-                    g2Main.scale(flower1Scale, flower1Scale);
-                    g2Main.translate(-w/2, 0);
+                    g2.translate(w/2, 0);
+                    g2.scale(flower1Scale, flower1Scale);
+                    g2.translate(-w/2, 0);
+                } else if (name.startsWith("flower_down")){
+                    g2.translate(w/2, h);
+                    g2.scale(flower1Scale, flower1Scale);
+                    g2.translate(-w/2, -h);
+                } else if (name.startsWith("butterfly")){
+                    int nameState = Integer.parseInt(name.split("(?<=_)(?=\\d+)")[1]);
+                    if (nameState != butterflyState) continue;
                 }
-                else if (name.startsWith("flower_down")){
-                    g2Main.translate(w/2, h);
-                    g2Main.scale(flower1Scale, flower1Scale);
-                    g2Main.translate(-w/2, -h);
-                }
-                g2Main.drawImage(sub2Buffer, 0, 0, null);
-                g2Main.setTransform(Tx);
+                g2.drawImage(sub2Buffer, 0, 0, null);
+                g2.setTransform(Tx);
             } // for
             return sub1Buffer;
         } // if
