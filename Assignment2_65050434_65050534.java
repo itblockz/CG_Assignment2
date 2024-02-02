@@ -28,17 +28,14 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double catMustacheVelocity = 1; // seconds
     private static double catBeardScale = 0; // times
     private static double catBeardVelocity = 1; // seconds
-    private static double orangeVelocity = -35; // seconds
-    private static double orangeAccelaration = 0; // seconds
     private static double flower1Scale = 1; // times
     private static double flower1Velocity = 0.1; // seconds
-    private static double orangeRotate = 0; // degrees
-    private static double orangeMove = 0; // pixels
-    private static double orangeFriction = 5;
-    private static double catPosition = -78;
     private static double butterflyTimePeriod = 0.5; // seconds
     private static int butterflyStateNum = 6;
     private static int butterflyState = 0;
+    private static Color orangeSourceColor = Color.decode("#536E3E");
+    private static Color orangeTargetColor = Color.decode("#F59203");
+    private static Color orangeColor;
     private static BufferedImage buffer;
     public static void main(String[] args) {
         Assignment2_65050434_65050534 m = new Assignment2_65050434_65050534();
@@ -58,7 +55,8 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
         double currentTime, startTime;
 
         int fps = 60;
-        int num = fps * 5;
+        double animationTime = 5; // seconds
+        int num = (int)(fps * animationTime);
         elapsedTime = 1000.0 / fps;
         elapsedTimeSinceStart = 0;
         BufferedImage[] images = new BufferedImage[num];
@@ -75,7 +73,7 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
         while (true) {
             currentTime = System.currentTimeMillis();
             elapsedTimeSinceStart = currentTime - startTime;
-            int idx = (int)(elapsedTimeSinceStart * num / 5000.0);
+            int idx = (int)(elapsedTimeSinceStart * num / (animationTime * 1000.0));
             idx %= num;
             buffer = images[idx];
             repaint();
@@ -83,17 +81,11 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     }
 
     public void updateAnimation(double elapsedTime, double elapsedTimeSinceStart) { // millisecond
-        elapsedTimeSinceStart /= 1000.0;
+        elapsedTimeSinceStart /= 1000.0; // milliseconds to seconds
         catFrontLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
         catBackLegRotate += catFrontLegVelocity * elapsedTime / 1000.0;
-        // orangeMove += orangeVelocity * elapsedTime / 1000.0;
         catPacifierMove += catPacifierVelocity * elapsedTime / 1000.0;
         butterflyState = (int)(elapsedTimeSinceStart * butterflyStateNum / butterflyTimePeriod) % butterflyStateNum;
-        
-        if (orangeVelocity > 0) orangeAccelaration = -orangeFriction;
-        else if (orangeVelocity < 0) orangeAccelaration = orangeFriction;
-        // orangeRotate += (-2 * orangeVelocity) * elapsedTime / 1000.0;
-        orangeVelocity += orangeAccelaration * elapsedTime / 1000.0;
         
         // Check for swing limits and reverse direction if necessary
         if (catFrontLegRotate >= catLegSwingLimit) {
@@ -113,7 +105,7 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
 
         if (elapsedTimeSinceStart > 1.0 && elapsedTimeSinceStart <= 3.0) {
             catPacifierVelocity += catPacifierAccelaration * elapsedTime / 1000.0;
-        } else if (elapsedTimeSinceStart > 3.0 && elapsedTimeSinceStart <= 5.0) {
+        } else if (elapsedTimeSinceStart > 3.0) {
             catMustacheScale += catMustacheVelocity * elapsedTime / 1000.0;
             catBeardScale += catBeardVelocity * elapsedTime / 1000.0;
             if (catMustacheScale > 1) {
@@ -123,16 +115,16 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 catBeardScale = 1;
             }
         }
-        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <=4){
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 4.0){
             flower1Scale +=  flower1Velocity * elapsedTime / 1000.0;
         }
-        
-        // Bounce back if enter cat
-        if (orangeMove < catPosition) {
-            orangeMove = catPosition;
-            orangeVelocity = -orangeVelocity;
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 3.0){
+            int red = (int)(linear(elapsedTimeSinceStart/3.0, orangeSourceColor.getRed(), orangeTargetColor.getRed()));
+            int green = (int)(linear(elapsedTimeSinceStart/3.0, orangeSourceColor.getGreen(), orangeTargetColor.getGreen()));
+            int blue = (int)(linear(elapsedTimeSinceStart/3.0, orangeSourceColor.getBlue(), orangeTargetColor.getBlue()));
+            orangeColor = new Color(red, green, blue);
         }
-    }
+    } // updateAnimation
 
     @Override
     public void paintComponent(Graphics g) {
@@ -158,12 +150,18 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                 double angle = Double.parseDouble(row.get("ROTATION"));
                 Color stroke = Color.decode(row.get("STROKE"));
                 String d = row.get("D");
+                if (name.equals("orange") && orangeColor != null) {
+                    stroke = orangeColor;
+                }
                 g2Sub.setColor(stroke);
                 draw(g2Sub, d);
                 if (!row.get("FILL").isEmpty()) {
                     Color fill = Color.decode(row.get("FILL"));
                     int seedX = (int) Math.round(Double.parseDouble(row.get("SEED_X")));
                     int seedY = (int) Math.round(Double.parseDouble(row.get("SEED_Y")));
+                    if (name.equals("orange") && orangeColor != null) {
+                        fill = orangeColor;
+                    }
                     GraphicsEngine.fill(sub2Buffer, seedX, seedY, fill);
                 }
                 g2.setTransform(new AffineTransform());
@@ -185,11 +183,6 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     g2.scale(1, catMustacheScale);
                 } else if (name.startsWith("cat_beard")) {
                     g2.scale(1, catBeardScale);
-                } else if (name.startsWith("orange")) {
-                    originX = 32;
-                    originY = 27;
-                    g2.translate(orangeMove, 0);
-                    g2.rotate(-Math.toRadians(orangeRotate), originX, originY);
                 } else if (name.startsWith("flower_up")){
                     g2.translate(w/2, 0);
                     g2.scale(flower1Scale, flower1Scale);
@@ -208,7 +201,7 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
             return sub1Buffer;
         } // if
         return null;
-    }
+    } // getDrawnBuffer
 
     public void draw(Graphics2D g2, String d) {
         String[] tokens = d.split("(?<=[A-Z]*)(?=[A-Z])");
@@ -281,5 +274,9 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
 
     private double cubic(double t, int x1, int x2, int x3, int x4) {
         return (1-t)*(1-t)*(1-t)*x1 + 3*t*(1-t)*(1-t)*x2 + 3*t*t*(1-t)*x3 + t*t*t*x4;
+    }
+
+    private double linear(double t, int x1, int x2) {
+        return (1-t)*x1 + t*x2;
     }
 } // class
