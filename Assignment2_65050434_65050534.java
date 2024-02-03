@@ -21,18 +21,24 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
     private static double catBackLegRotate = 0; // degrees
     private static double catBackLegVelocity = 20; // seconds
     private static double catLegSwingLimit = 10; // degrees
-    private static double catPacifierMove = 0; // pixels
+    private static double catPacifierMove = 0;
     private static double catPacifierVelocity = 0; // seconds
     private static double catPacifierAccelaration = 200; // seconds
-    private static double catMustacheScale = 0; // times
+    private static double catMustacheScale = 0;
     private static double catMustacheVelocity = 1; // seconds
-    private static double catBeardScale = 0; // times
+    private static double catBeardScale = 0;
     private static double catBeardVelocity = 1; // seconds
-    private static double flower1Scale = 1; // times
+    private static double flower1Scale = 1;
     private static double flower1Velocity = 0.1; // seconds
     private static double butterflyTimePeriod = 0.5; // seconds
     private static int butterflyStateNum = 6;
     private static int butterflyState = 0;
+    private static double xButterfly1 = 0;
+    private static double yButterfly1 = 0;
+    private static double xButterfly2 = 0;
+    private static double yButterfly2 = 0;
+    private static double xButterfly3 = 0;
+    private static double yButterfly3 = 0;
     private static Color orangeSourceColor = Color.decode("#536E3E");
     private static Color orangeTargetColor = Color.decode("#F59203");
     private static Color orangeColor;
@@ -124,7 +130,27 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
             int blue = (int)(linear(elapsedTimeSinceStart/3.0, orangeSourceColor.getBlue(), orangeTargetColor.getBlue()));
             orangeColor = new Color(red, green, blue);
         }
-    } // updateAnimation
+
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 3){
+            xButterfly1 = cubic(elapsedTimeSinceStart/3, 0, 59, 202, 311);
+            yButterfly1 = cubic(elapsedTimeSinceStart/3, 0, 21, 94, 54);
+        }else if(elapsedTimeSinceStart > 3 && elapsedTimeSinceStart <= 5){
+            xButterfly1 = cubic((elapsedTimeSinceStart-3)/2, 311 , 435 , 423 , 428);
+            yButterfly1 = cubic((elapsedTimeSinceStart-3)/2, 54 , 8 , -56 , -68);
+        }
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 5){
+            xButterfly2 = cubic(elapsedTimeSinceStart/5, 0, -28, -164, -475);
+            yButterfly2 = cubic(elapsedTimeSinceStart/5, 0, -96, -281, -249);
+        }
+        if (elapsedTimeSinceStart > 0 && elapsedTimeSinceStart <= 3){
+            xButterfly3 = cubic(elapsedTimeSinceStart/3, 0, 24, 118, 306);
+            yButterfly3 = cubic(elapsedTimeSinceStart/3, 0, -29, -98, -138);
+        }else if (elapsedTimeSinceStart > 3 && elapsedTimeSinceStart <= 5){
+            xButterfly3 = cubic((elapsedTimeSinceStart-3)/2, 306, 493, 515, 503);
+            yButterfly3 = cubic((elapsedTimeSinceStart-3)/2, -138, -179, -269, -309);
+        }
+
+    }
 
     @Override
     public void paintComponent(Graphics g) {
@@ -192,8 +218,24 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
                     g2.scale(flower1Scale, flower1Scale);
                     g2.translate(-w/2, -h);
                 } else if (name.startsWith("butterfly")){
-                    int nameState = Integer.parseInt(name.split("(?<=_)(?=\\d+)")[1]);
+                    String[] tokens = name.split("_");
+                    int butterfly = Integer.parseInt(tokens[1]);
+                    int nameState = Integer.parseInt(tokens[2]);
                     if (nameState != butterflyState) continue;
+                    switch (butterfly) {
+                        case 1:
+                            g2.translate(xButterfly1, yButterfly1);
+                            break;
+                        case 2:
+                            g2.translate(xButterfly2, yButterfly2);
+                            g2.scale(-1, 1);
+                            break;
+                        case 3:
+                            g2.translate(xButterfly3, yButterfly3);
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 g2.drawImage(sub2Buffer, 0, 0, null);
                 g2.setTransform(Tx);
