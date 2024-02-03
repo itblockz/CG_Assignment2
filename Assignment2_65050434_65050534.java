@@ -61,7 +61,7 @@ public class Assignment2_65050434_65050534 extends JPanel implements Runnable {
         double currentTime, startTime;
 
         int fps = 60;
-        double animationTime = 5; // seconds
+        double animationTime = 6; // seconds
         int num = (int)(fps * animationTime);
         elapsedTime = 1000.0 / fps;
         elapsedTimeSinceStart = 0;
